@@ -23,6 +23,7 @@ func main() {
 	// Trust the Nginx reverse proxy running on localhost
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 
+	// Middleware to verify if the request was sent from GitHub
 	r.Use(validateSecret)
 
 	fmt.Println("Starting Deployinator server on port 4444")
