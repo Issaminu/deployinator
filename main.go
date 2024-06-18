@@ -27,6 +27,6 @@ func main() {
 
 	fmt.Println("Starting Deployinator server on port 4444")
 
-	r.GET("/*projectName", handleProjectDeploy)
+	r.POST("/*projectName", handleProjectDeploy)
 	r.Run(":4444")
 }
