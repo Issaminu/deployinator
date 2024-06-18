@@ -8,7 +8,7 @@ It listens for incoming deployment requests from GitHub Webhooks, validates them
 
 - Secure deployment using HMAC SHA256 signatures
 - Easy-to-extend with deployment scripts
-- You'll never have to worry about a [random $10k bill ever again](https://serverlesshorrors.com/).
+- You'll never have to worry about a <a href="https://serverlesshorrors.com/" target="_blank">random $10k bill ever again</a>.
 
 ## Installation
 
