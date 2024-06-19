@@ -13,7 +13,6 @@ import (
 )
 
 func handleProjectDeploy(c *gin.Context) {
-
 	projectName := c.Param("projectName")
 
 	scriptPath := "./deploy_scripts/" + projectName + ".sh"
@@ -22,14 +21,12 @@ func handleProjectDeploy(c *gin.Context) {
 		log.Fatalf("Deploy script %s does not exist", scriptPath)
 	}
 
-	cmd := exec.Command("/bin/bash", scriptPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
+	if projectName == "deployinator" {
+		go runDeployScript(c, scriptPath)
+		c.String(200, "Deployinator is attempting to deploy itself")
+		return
 	}
-	c.String(200, "Deployed successfully")
+	runDeployScript(c, scriptPath)
 }
 
 func validateSecret(c *gin.Context) {
@@ -84,4 +81,16 @@ func getPayloadBody(c *gin.Context) ([]byte, error) {
 
 func getSignatureHeader(c *gin.Context) string {
 	return c.GetHeader("X-Hub-Signature-256")
+}
+
+func runDeployScript(c *gin.Context, scriptPath string) {
+	cmd := exec.Command("/bin/bash", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+		c.String(500, "Error deploying project")
+	}
+	c.String(200, "Deployed successfully")
 }
