@@ -19,6 +19,7 @@ type Status struct {
 
 func handleProjectDeploy(c *gin.Context) {
 	projectName := c.Param("projectName")
+	log.Printf("Received request to deploy project %s", projectName)
 
 	scriptPath := "./deploy_scripts/" + projectName + ".sh"
 	_, err := os.Stat(scriptPath)
