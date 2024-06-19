@@ -29,16 +29,12 @@ func handleProjectDeploy(c *gin.Context) {
 
 	// Special handling for deployinator, as it needs to respond to the request before running it's own deploy script
 	if projectName == "deployinator" {
-		go deployDeployinator(c)
+		c.AbortWithStatus(204)
+		deployProject(scriptPath)
 	} else {
 		result := deployProject(scriptPath)
 		c.String(result.statusCode, result.message)
 	}
-}
-
-func deployDeployinator(c *gin.Context) {
-	c.String(200, "Attempting to deploy deployinator")
-	deployProject("./deploy_scripts/deployinator.sh")
 }
 
 func deployProject(scriptPath string) Status {
