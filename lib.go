@@ -32,8 +32,10 @@ func handleProjectDeploy(c *gin.Context) {
 		c.String(200, "Attempting to deploy deployinator")
 		// go deployProject(scriptPath)
 	} else {
-		result := deployProject(scriptPath)
-		c.String(result.statusCode, result.message)
+		// result := deployProject(scriptPath)
+		// c.String(result.statusCode, result.message)
+		c.String(200, "Attempting to deploy deployinator")
+
 	}
 }
 
