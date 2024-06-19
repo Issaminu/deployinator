@@ -12,6 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Status struct {
+	statusCode int
+	message    string
+}
+
 func handleProjectDeploy(c *gin.Context) {
 	projectName := c.Param("projectName")
 
@@ -19,14 +24,40 @@ func handleProjectDeploy(c *gin.Context) {
 	_, err := os.Stat(scriptPath)
 	if os.IsNotExist(err) {
 		log.Fatalf("Deploy script %s does not exist", scriptPath)
+		c.AbortWithStatus(404)
 	}
 
+	// Special handling for deployinator, as it needs to respond to the request before running it's own deploy script
 	if projectName == "deployinator" {
-		go runDeployScript(c, scriptPath)
-		c.String(200, "Deployinator is attempting to deploy itself")
-		return
+		c.String(200, "Attempting to deploy deployinator")
+		go deployProject(scriptPath)
+	} else {
+		result := deployProject(scriptPath)
+		c.String(result.statusCode, result.message)
 	}
-	runDeployScript(c, scriptPath)
+}
+
+func deployProject(scriptPath string) Status {
+	scriptStatus := make(chan Status)
+	go runDeployScript(scriptPath, scriptStatus)
+	result := <-scriptStatus
+	return result
+}
+
+func runDeployScript(scriptPath string, status chan Status) {
+	cmd := exec.Command("/bin/bash", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+		if gin.Mode() == gin.ReleaseMode {
+			status <- Status{500, "Error running deploy script"}
+		} else {
+			status <- Status{500, "Error running deploy script: " + err.Error()}
+		}
+	}
+	status <- Status{200, "Deploy script finished"}
 }
 
 func validateSecret(c *gin.Context) {
@@ -81,16 +112,4 @@ func getPayloadBody(c *gin.Context) ([]byte, error) {
 
 func getSignatureHeader(c *gin.Context) string {
 	return c.GetHeader("X-Hub-Signature-256")
-}
-
-func runDeployScript(c *gin.Context, scriptPath string) {
-	cmd := exec.Command("/bin/bash", scriptPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-		c.String(500, "Error deploying project")
-	}
-	c.String(200, "Deployed successfully")
 }
