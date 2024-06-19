@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -31,7 +30,7 @@ func handleProjectDeploy(c *gin.Context) {
 	// Special handling for deployinator, as it needs to respond to the request before running it's own deploy script
 	if projectName == "deployinator" {
 		c.AbortWithStatus(204)
-		fmt.Println("TEST")
+		log.Println("TEST")
 		// deployProject(scriptPath)
 	} else {
 		result := deployProject(scriptPath)
