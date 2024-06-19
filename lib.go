@@ -21,7 +21,7 @@ func handleProjectDeploy(c *gin.Context) {
 	projectName := c.Param("projectName")
 	log.Printf("Received request to deploy project %s", projectName)
 
-	scriptPath := "./deploy_scripts/" + projectName + ".sh"
+	scriptPath := "./deploy_scripts" + projectName + ".sh"
 	_, err := os.Stat(scriptPath)
 	if os.IsNotExist(err) {
 		log.Fatalf("Deploy script %s does not exist", scriptPath)
@@ -29,7 +29,7 @@ func handleProjectDeploy(c *gin.Context) {
 	}
 
 	// Special handling for deployinator, as it needs to respond to the request before running it's own deploy script
-	if projectName == "deployinator" {
+	if projectName == "/deployinator" {
 		c.AbortWithStatus(204)
 		log.Println("TEST")
 		// deployProject(scriptPath)
