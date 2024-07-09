@@ -3,6 +3,7 @@
 echo "Deploying Stellantis VENG Project Manager"
 
 cd /var/www/stellantis-project-manager/
+git reset --hard
 git pull origin main
 systemctl restart postgresql
 npm install
