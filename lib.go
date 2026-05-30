@@ -24,8 +24,14 @@ func handleProjectDeploy(c *gin.Context) {
 	scriptPath := "./deploy_scripts" + projectName + ".sh"
 	_, err := os.Stat(scriptPath)
 	if os.IsNotExist(err) {
-		log.Fatalf("Deploy script %s does not exist", scriptPath)
+		log.Printf("Deploy script %s does not exist", scriptPath)
 		c.AbortWithStatus(404)
+		return
+	}
+	if err != nil {
+		log.Printf("Unable to stat deploy script %s: %s", scriptPath, err)
+		c.AbortWithStatus(500)
+		return
 	}
 
 	// Special handling for deployinator, as it needs to respond to the request before running it's own deploy script
@@ -51,12 +57,13 @@ func runDeployScript(scriptPath string, status chan Status) {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		log.Fatal(err)
 		if gin.Mode() == gin.ReleaseMode {
 			status <- Status{500, "Error running deploy script"}
 		} else {
 			status <- Status{500, "Error running deploy script: " + err.Error()}
 		}
+		log.Printf("Error running deploy script %s: %s", scriptPath, err)
+		return
 	}
 	status <- Status{200, "Deploy script finished"}
 }

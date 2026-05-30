@@ -14,7 +14,7 @@ as_repo_user() {
 }
 
 as_repo_user git pull --ff-only origin main
-// as_repo_user go test ./...
+# as_repo_user go test ./...
 as_repo_user go build -o donut-server ./cmd/donut-server
 systemctl restart donut
 systemctl is-active --quiet donut
